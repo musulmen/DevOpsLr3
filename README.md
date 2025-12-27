@@ -1,485 +1,151 @@
-# Лабораторная работа: Основы Ansible в DevOps
+# Отчет по лабраторной работе на тему "Автоматизация сборки и деплоя Python Docker-приложений через Jenkins с интеграцией GitHub"
+Введение
+Цель данной лабораторной работы — освоить практические навыки работы с Ansible, инструментом для автоматизации конфигурации и управления инфраструктурой. В рамках работы предстояло настроить управляющую машину с Ansible, развернуть управляемый хост в Docker-контейнере, настроить SSH-подключение без пароля, создать инвентарный файл и выполнить
 
----
+Ход работы
+# 1.1 Обновление пакетов системы
 
-## Что такое Ansible
-Ansible помогает автоматизировать настройку удалённых серверов в сети и управление ими. Он позволяет управлять конфигурациями машин, доставлять и развёртывать приложения, а также выполнять другие задачи администрирования без ручного вмешательства.
+<img width="320" height="98" alt="image" src="https://github.com/user-attachments/assets/c0e68428-7c14-44aa-bac8-70da139c1e3e" />
+<img width="399" height="115" alt="image" src="https://github.com/user-attachments/assets/9c1a225b-7081-477e-8814-d564e3e450a3" />
 
-Обычным способом нужно вручную прописывать каждую команду или скрипт и по кругу запускать их на серверах. Когда серверов много, это процесс становится сложным и трудоёмким. C помощью Ansible всю настройку можно прописать в одном конфигурационном файле, который программа разошлёт на большое количество машин. Такой метод работы называют IaC — infrastructure as a code («инфраструктура как код»).
+# 1.2 Установка Python и pip
 
-## Для чего используют Ansible
-Ansible используют сетевые администраторы, DevOps-инженеры, разработчики ПО и системные администраторы. Вот основные функции программы:
+<img width="646" height="62" alt="image" src="https://github.com/user-attachments/assets/8ceb7903-9328-433b-af34-1ced278c48af" />
 
-●	Управление конфигурацией. Ansible позволяет управлять конфигурациями серверов и поддерживать их, чтобы они оставались в согласованном состоянии. С его помощью можно проводить установку и настройку программного обеспечения, управлять файлами конфигурации и обеспечивать выполнение политик безопасности.
+# 1.3 Установка Ansible через apt
 
-●	Развёртывание приложений. Ansible автоматизирует процесс развёртывания приложений, включая установку необходимых зависимостей, копирование файлов приложений, настройку серверов и запуск сервисов.
+<img width="461" height="91" alt="image" src="https://github.com/user-attachments/assets/4ab25ba5-582b-440c-b028-d300bbc1944d" />
 
-●	Оркестрация. Это процесс координации и управления выполнения задач на нескольких серверах или системах для обеспечения их согласованного и эффективного взаимодействия. Ansible позволяет проводить оркестрацию нескольких серверов — например, при обновлении кластеров или выполнении сложных операций, требующих координации между различными сервисами и машинами.
+# 1.4 Проверка установки Ansible
 
-●	Управление облачной инфраструктурой. Ansible поддерживает множество провайдеров облачных услуг, включая AWS, Azure и Google Cloud. Он позволяет создавать, изменять и удалять облачные ресурсы, включая виртуальные машины, сети, хранилища и другие компоненты.
+<img width="929" height="169" alt="image" src="https://github.com/user-attachments/assets/b4ebfffa-1d5c-4a82-8fcb-2a476591db34" />
 
-●	Управление контейнерами. Контейнеры — это небольшие самодостаточные единицы, которые включают всё необходимое для выполнения приложения: код, зависимости, библиотеки и конфигурационные файлы. Они обеспечивают изоляцию приложения от системы, на которой оно работает, что позволяет легко переносить и запускать приложения в различных средах. Ansible интегрируется с Docker и Kubernetes, что позволяет автоматизировать развёртывание и масштабирование контейнеризированных приложений, а также управление ими.
+# 2.1 Генерация SSH ключевой пары
 
-●	Обеспечение безопасности. Ansible может использоваться для автоматизации задач безопасности, включая установку обновлений и патчей, настройку файерволов, управление учётными записями пользователей и применение политик безопасности.
+<img width="647" height="318" alt="image" src="https://github.com/user-attachments/assets/8a9057a6-bed7-4da9-8b0f-ed8b3a220091" />
 
-●	Мониторинг и оповещение. Ansible помогает в настройке систем мониторинга, таких как Prometheus, Nagios, Zabbix, и управлении ими, а также в настройке систем оповещения. Он помогает провести установку агентов мониторинга, настройку метрик и создание уведомлений.
+# 2.2 Установка прав доступа
 
-●	Резервное копирование и восстановление. Ansible можно использовать для автоматизации процессов резервного копирования и восстановления данных. Это включает настройку задач для регулярного создания резервных копий и автоматизированное восстановление данных в случае сбоя.
+<img width="478" height="59" alt="image" src="https://github.com/user-attachments/assets/f7be1ce3-2731-458c-9197-22f2ba0fe5f5" />
 
-●	Управление пользователями и группами. Ansible упрощает управление учётными записями пользователей и группами на серверах, что важно для соблюдения политик безопасности и управления доступом.
+# Проверка создания ключей
 
-●	Создание тестовых и разработческих сред. Ansible позволяет быстро и легко создавать и настраивать тестовые и разработческие среды, обеспечивая их идентичность продуктивным системам. Это помогает разработчикам и тестировщикам работать в условиях, максимально приближенных к реальным.
+<img width="614" height="51" alt="image" src="https://github.com/user-attachments/assets/4ba161be-a271-4bd9-a50c-c242fa955225" />
 
----
+ШАГ 3: Запуск управляемого контейнера в Docker
+Создаем рабочую директорию
 
-## 1. Установка Ansible на управляющую машину (Linux/WSL)
+<img width="350" height="62" alt="image" src="https://github.com/user-attachments/assets/769c5a7b-3354-4d25-ad4a-ef1c1f3194bc" />
 
-### Шаг 1.1: Обновление пакетов системы
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
+Dockerfile:
 
-### Шаг 1.2: Установка Python и pip
-Ansible требует Python 3.9+:
-```bash
-sudo apt install -y python3 python3-pip python3-venv
-```
+<img width="776" height="550" alt="image" src="https://github.com/user-attachments/assets/fff1a313-ab21-4234-b699-dd1e4cdce091" />
 
-Проверка версии Python:
-```bash
-python3 --version
-```
+docker-compose.yml:
 
-### Шаг 1.3: Установка Ansible
-```bash
-sudo apt install -y ansible
-```
+<img width="594" height="408" alt="image" src="https://github.com/user-attachments/assets/61d20219-6d38-4648-8ebd-3ac7aa3b8b9a" />
 
-Или через pip (рекомендуется новая версия):
-```bash
-pip3 install --user ansible
-```
-
-Добавьте pip в PATH (если нужно):
-```bash
-export PATH=$PATH:~/.local/bin
-echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc
-source ~/.bashrc
-```
-
-### Шаг 1.4: Проверка установки Ansible
-```bash
-ansible --version
-```
-
-Ожидаемый вывод:
-```
-ansible [core 2.14.x]
-  config file = None
-  configured module search path = ['/home/user/.ansible/plugins/modules']
-  ...
-```
-
----
-
-## 2. Подготовка SSH ключей для управляемых машин
-
-SSH ключи используются для аутентификации Ansible на управляемых хостах без ввода пароля.
-
-### Шаг 2.1: Генерация SSH ключевой пары на управляющей машине
-```bash
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/ansible_key -N ""
-```
-
-Параметры:
-- `-t rsa` - тип ключа (RSA 4096 бит)
-- `-b 4096` - размер ключа (безопасный размер)
-- `-f ~/.ssh/ansible_key` - путь сохранения приватного ключа
-- `-N ""` - пустой пароль для ключа (для автоматизации)
-
-Проверка ключей:
-```bash
-ls -la ~/.ssh/ansible_key*
-```
-
-### Шаг 2.2: Установка прав доступа на приватный ключ
-```bash
-chmod 600 ~/.ssh/ansible_key
-chmod 644 ~/.ssh/ansible_key.pub
-```
-
----
-
-## 3. Запуск управляемого контейнера в Docker
-
-### Шаг 3.1: Создание Dockerfile для управляемого хоста
-Используйте **Dockerfile** из раздела "Готовые файлы" ниже.
-
-### Шаг 3.2: Создание docker-compose.yml
-Используйте **docker-compose.yml** из раздела "Готовые файлы" ниже.
-
-### Шаг 3.3: Сборка и запуск контейнера
-```bash
-# Перейдите в директорию с docker-compose.yml
-cd /path/to/project
+Сборка и запуск контейнера:
 
 # Сборка образа
-docker-compose build
-
 # Запуск контейнера в фоновом режиме
-docker-compose up -d
-```
-
-### Шаг 3.4: Проверка запущенного контейнера
-```bash
-docker-compose ps
-```
-
-Ожидаемый вывод:
-```
-NAME                    COMMAND               STATUS      PORTS
-ansible-managed-host    "/usr/sbin/sshd -D"   Up 1 min    0.0.0.0:2222->22/tcp
-```
-
-### Шаг 3.5: Копирование публичного SSH ключа в контейнер
-```bash
-# Создаёте директорию .ssh в контейнере и копируете публичный ключ
-docker exec ansible-managed-host mkdir -p /home/ansible/.ssh
-
-docker cp ~/.ssh/ansible_key.pub ansible-managed-host:/home/ansible/.ssh/authorized_keys
-
-# Установка правильных прав доступа
-docker exec ansible-managed-host chown -R ansible:ansible /home/ansible/.ssh
-docker exec ansible-managed-host chmod 700 /home/ansible/.ssh
-docker exec ansible-managed-host chmod 600 /home/ansible/.ssh/authorized_keys
-```
-
----
-
-## 4. Проверка SSH подключения к контейнеру
-
-### Шаг 4.1: Проверка SSH подключения
-```bash
-ssh -i ~/.ssh/ansible_key -p 2222 ansible@localhost
-```
-
-Ожидаемый результат: вы должны попасть в bash контейнера без ввода пароля.
-
-Выход из контейнера:
-```bash
-exit
-```
-
----
-
-## 5. Создание инвентарного файла Ansible (inventory)
-
-Инвентарный файл описывает, какие машины управляет Ansible.
-
-### Шаг 5.1: Создание файла `inventory.ini`
-
-Создайте файл `inventory.ini` в рабочей директории:
-```ini
-[managed_hosts]
-managed1 ansible_host=localhost ansible_port=2222 ansible_user=ansible ansible_ssh_private_key_file=~/.ssh/ansible_key ansible_python_interpreter=/usr/bin/python3
-
-[all:vars]
-ansible_ssh_common_args=-o StrictHostKeyChecking=no
-```
-
-**Объяснение параметров:**
-- `[managed_hosts]` - группа хостов (можно иметь несколько групп)
-- `managed1` - имя хоста в инвентаре (локальное имя, не обязательно реальное)
-- `ansible_host=localhost` - IP адрес или FQDN реального хоста
-- `ansible_port=2222` - порт SSH (из docker-compose)
-- `ansible_user=ansible` - пользователь для подключения
-- `ansible_ssh_private_key_file` - путь к приватному SSH ключу
-- `ansible_python_interpreter` - путь к интерпретатору Python на управляемом хосте
-- `ansible_ssh_common_args` - отключает проверку ключа хоста (для первого подключения)
-
-### Шаг 5.2: Проверка инвентаря
-```bash
-ansible-inventory -i inventory.ini --list
-```
-
-Ожидаемый вывод (JSON формат):
-```json
-{
-    "_meta": {
-        "hostvars": {
-            "managed1": {
-                "ansible_host": "localhost",
-                "ansible_port": "2222",
-                ...
-            }
-        }
-    },
-    "all": {...},
-    "managed_hosts": {...},
-    "ungrouped": {}
-}
-```
-
----
-
-## 6. Проверка подключения Ansible к управляемому хосту
-
-### Шаг 6.1: Тест ping
-```bash
-ansible -i inventory.ini managed_hosts -m ping
-```
-
-Ожидаемый вывод:
-```
-managed1 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-```
-
-### Шаг 6.2: Сбор информации о системе (facts)
-```bash
-ansible -i inventory.ini managed1 -m setup
-```
-
-Выведет всю информацию о системе управляемого хоста.
-
-### Шаг 6.3: Выполнение простой команды
-```bash
-ansible -i inventory.ini managed1 -m command -a "uname -a"
-```
-
-Ожидаемый вывод:
-```
-managed1 | CHANGED | rc=0 >>
-Linux f3a4c8b0c4a2 5.15.0-92-generic #102-Ubuntu SMP Thu Jan 9 10:54:01 UTC 2025 x86_64 GNU/Linux
-```
-
----
-
-## 7. Создание и запуск Ansible Playbook
-
-### Шаг 7.1: Структура проекта
-```
-project/
-├── Dockerfile
-├── docker-compose.yml
-├── inventory.ini
-├── playbook.yml
-└── README.md
-```
-
-### Шаг 7.2: Создание playbook.yml
-Используйте готовый playbook из раздела "Готовые файлы" ниже.
-
-### Шаг 7.3: Запуск playbook
-```bash
-# Запуск playbook
-ansible-playbook -i inventory.ini playbook.yml
-```
-
-### Шаг 7.4: Вывод playbook
-```
-PLAY [managed_hosts] ************************************************************
-
-TASK [Gathering Facts] **********************************************************
-ok: [managed1]
-
-TASK [Update package list] ******************************************************
-changed: [managed1]
-
-TASK [Install required packages] ************************************************
-changed: [managed1]
-
-TASK [Create test directory] ****************************************************
-changed: [managed1]
-
-TASK [Create test file with content] ********************************************
-changed: [managed1]
-
-TASK [Display file content] *****************************************************
-ok: [managed1] => {
-    "msg": "File content from managed host: Hello from Ansible!\nThis is a test file created by Ansible playbook."
-}
-
-TASK [Get system information] ***************************************************
-ok: [managed1] => {
-    "msg": "System: Linux, Hostname: f3a4c8b0c4a2, Uptime: 12 min"
-}
-
-PLAY RECAP ************************************************************
-managed1 : ok=7 changed=4 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
-```
-
----
-
-## 8. Задания для выполнения
-
-### Задание 1: Базовое подключение
-1. Установите Ansible на вашей машине
-2. Сгенерируйте SSH ключевую пару
-3. Создайте инвентарный файл `inventory.ini`
-4. Проверьте подключение командой `ansible-inventory --list`
-5. Выполните ping к управляемому хосту
-
-**Ожидаемый результат:** успешный ответ "pong" от управляемого хоста
-
----
-
-### Задание 2: Базовые ad-hoc команды
-1. Получите информацию о ядрах CPU управляемого хоста:
-   ```bash
-   ansible -i inventory.ini managed1 -m setup -a "filter=ansible_processor_cores"
-   ```
-
-2. Проверьте свободное место на диске:
-   ```bash
-   ansible -i inventory.ini managed1 -m command -a "df -h"
-   ```
-
-3. Получите список всех пользователей:
-   ```bash
-   ansible -i inventory.ini managed1 -m command -a "cat /etc/passwd"
-   ```
-
-4. Измените временную зону хоста на UTC:
-   ```bash
-   ansible -i inventory.ini managed1 -m command -a "timedatectl set-timezone UTC"
-   ```
-
-**Ожидаемый результат:** вывод команд без ошибок
-
----
-
-### Задание 3: Работа с файлами
-1. Создайте новый playbook `task3_files.yml`:
-   ```yaml
-   ---
-   - name: Work with files
-     hosts: managed_hosts
-     tasks:
-       - name: Create multiple directories
-         file:
-           path: /tmp/{{ item }}
-           state: directory
-           mode: '0755'
-         loop:
-           - test_dir1
-           - test_dir2
-           - test_dir3
-   
-       - name: Create files in directories
-         copy:
-           content: "This is {{ item }} file\n"
-           dest: /tmp/{{ item }}/content.txt
-         loop:
-           - test_dir1
-           - test_dir2
-           - test_dir3
-   
-       - name: Display files
-         command: cat /tmp/{{ item }}/content.txt
-         loop:
-           - test_dir1
-           - test_dir2
-           - test_dir3
-         register: file_content
-   
-       - name: Show file contents
-         debug:
-           msg: "{{ item.stdout }}"
-         loop: "{{ file_content.results }}"
-   ```
-
-2. Запустите playbook:
-   ```bash
-   ansible-playbook -i inventory.ini task3_files.yml
-   ```
-
-**Ожидаемый результат:** три директории с файлами, созданные на управляемом хосте
-
----
-
-## 9. Полезные команды для отладки
-
-### Проверка подключения к контейнеру
-```bash
-docker-compose ps
-docker logs ansible-managed-host
-```
-
-### Подключение к контейнеру по SSH с дебаг информацией
-```bash
-ssh -v -i ~/.ssh/ansible_key -p 2222 ansible@localhost
-```
-
-### Перезагрузка контейнера
-```bash
-docker-compose restart
-```
-
-### Удаление контейнера и образа
-```bash
-docker-compose down
-docker-compose rm -f
-```
-
-### Запуск playbook с повышенной вербозностью
-```bash
-ansible-playbook -i inventory.ini playbook.yml -vvv
-```
-
-### Синтаксическая проверка playbook
-```bash
-ansible-playbook -i inventory.ini playbook.yml --syntax-check
-```
-
----
-
-## 10. Часто возникающие проблемы
-
-### Проблема: "Permission denied (publickey)"
-**Решение:**
-```bash
-# Проверьте права на приватный ключ
-chmod 600 ~/.ssh/ansible_key
-
-# Убедитесь, что публичный ключ скопирован правильно
-docker exec ansible-managed-host cat /home/ansible/.ssh/authorized_keys
-```
-
-### Проблема: "No module named 'jinja2'"
-**Решение:**
-```bash
-pip3 install jinja2
-ansible-inventory -i inventory.ini --list
-```
-
-### Проблема: "Connection refused" на порту 2222
-**Решение:**
-```bash
-# Проверьте, запущен ли контейнер
-docker ps
-
-# Пересоздайте контейнер
-docker-compose down
-docker-compose up -d
-```
-
-### Проблема: "UNREACHABLE! => {msg: 'Failed to connect to the host via ssh'"
-**Решение:**
-1. Проверьте SSH подключение вручную
-2. Убедитесь, что SSH сервис запущен в контейнере
-3. Проверьте права на файлы в `.ssh`
-
----
-
-## Дополнительные ресурсы
-
-- [Официальная документация Ansible](https://docs.ansible.com/)
-- [Ansible Best Practices](https://docs.ansible.com/ansible/latest/tips_tricks/index.html)
-- [Ansible Modules Index](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/index.html)
-- [Docker Documentation](https://docs.docker.com/)
-
----
+
+<img width="507" height="91" alt="image" src="https://github.com/user-attachments/assets/4152e56c-a3d4-45a4-aab1-d71c20fa4ede" />
+
+Проверка запущенного контейнера
+
+<img width="965" height="119" alt="image" src="https://github.com/user-attachments/assets/0a245e3c-0b94-4fad-9e20-be1ba61ece42" />
+
+Копирование публичного SSH ключа в контейнер
+# Создаем директорию .ssh в контейнере
+
+<img width="793" height="45" alt="image" src="https://github.com/user-attachments/assets/396bc5c8-cd66-4752-aa24-ccf8edb90759" />
+
+# Копируем публичный ключ
+
+<img width="702" height="53" alt="image" src="https://github.com/user-attachments/assets/6b27dcf6-10a4-46ad-ba9d-e8c7788f5195" />
+
+# Устанавливаем правильные права доступа
+
+<img width="921" height="52" alt="image" src="https://github.com/user-attachments/assets/554771e1-3847-4681-a0ce-691199ecfc20" />
+
+ШАГ 4: Проверка SSH подключения к контейнеру
+# 4.1 Проверка SSH подключения
+
+<img width="722" height="91" alt="image" src="https://github.com/user-attachments/assets/db4406b6-3c1d-48f6-938e-cbe3eda3b597" />
+<img width="720" height="297" alt="image" src="https://github.com/user-attachments/assets/e288d02a-f97d-4b3b-80a2-2d6de530d8dd" />
+<img width="254" height="37" alt="image" src="https://github.com/user-attachments/assets/bc456932-4495-40b3-a8e9-54358c811f95" />
+
+Выходим из контейнера
+
+<img width="258" height="51" alt="image" src="https://github.com/user-attachments/assets/de31d935-0c12-4f0d-8657-0b95aea6e34d" />
+
+ШАГ 5: Создание инвентарного файла Ansible
+inventory.ini:
+
+<img width="958" height="233" alt="image" src="https://github.com/user-attachments/assets/4057b5df-89f4-4e1f-a69b-6b2c319ec8e9" />
+
+Проверка инвентаря:
+
+<img width="649" height="438" alt="image" src="https://github.com/user-attachments/assets/27a1edf0-fc25-4fd3-bc3b-55f37b89affe" />
+
+Проверка подключения Ansible к управляемому хосту
+Тест ping:
+
+<img width="675" height="87" alt="image" src="https://github.com/user-attachments/assets/e99f99e3-0250-43db-bd74-4be4a020cfe6" />
+
+Сбор информации о системе:
+
+<img width="641" height="182" alt="image" src="https://github.com/user-attachments/assets/7a6eaa4d-7780-480a-8436-81cda1454a6f" />
+
+Выполнение простой команды:
+
+<img width="944" height="67" alt="image" src="https://github.com/user-attachments/assets/66c3f884-3137-4acc-9861-76d53e63a21e" />
+
+Создание и запуск Ansible Playbook
+playbook.yml
+
+<img width="527" height="129" alt="image" src="https://github.com/user-attachments/assets/cd8903ec-45d8-436d-ad01-f76c4edfda1b" />
+
+Запуск playbook:
+
+<img width="1280" height="274" alt="image" src="https://github.com/user-attachments/assets/e90d7890-1a1b-4f05-8185-6c96532577f4" />
+<img width="729" height="78" alt="image" src="https://github.com/user-attachments/assets/3a6ef19b-bd36-4da5-b510-1fc9d0b708a5" />
+
+Выполнение заданий для самостоятельной работы
+Задание 1: Базовое подключение (уже выполнено)
+Ansible установлен
+SSH ключи сгенерированы
+Инвентарный файл создан
+Ping работает
+Задание 2: Базовые ad-hoc команды
+# 1. Информация о ядрах CPU
+
+<img width="927" height="120" alt="image" src="https://github.com/user-attachments/assets/bf86ba18-2977-4ffa-9642-15286575cca1" />
+
+# 2. Свободное место на диске
+
+<img width="741" height="167" alt="image" src="https://github.com/user-attachments/assets/9e1ee3af-7c4d-4f5c-ac2c-028f59c663a7" />
+
+# 3. Список всех пользователей
+
+<img width="800" height="421" alt="image" src="https://github.com/user-attachments/assets/c85fc8f4-f8d8-40c9-a7fe-64d1110e2052" />
+
+# 4. Изменение временной зоны хоста на UTC (с использованием sudo)
+
+<img width="937" height="56" alt="image" src="https://github.com/user-attachments/assets/2c9ed148-6485-4fc6-9cae-434487247032" />
+
+Задание 3: Работа с файлами
+task3_files.yml:
+
+<img width="561" height="634" alt="image" src="https://github.com/user-attachments/assets/d901761b-f845-4585-829a-2fa79bd2a852" />
+
+Запуск playbook:
+
+<img width="1280" height="495" alt="image" src="https://github.com/user-attachments/assets/9f5bdf41-43dd-4c2e-be56-aaba28b1f1ef" />
+<img width="615" height="44" alt="image" src="https://github.com/user-attachments/assets/bdc8cba4-5a96-4647-bb11-46470f3c52ac" />
+
+Проверка результатов:
+
+<img width="859" height="85" alt="image" src="https://github.com/user-attachments/assets/28c4a006-5221-4754-ba7f-6aec7ab1a27e" />
+<img width="942" height="82" alt="image" src="https://github.com/user-attachments/assets/12cdcc67-4445-4d3e-94c5-1c9f081ef30c" />
